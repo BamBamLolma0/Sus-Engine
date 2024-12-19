@@ -77,11 +77,9 @@ class FreeplayCard extends FlxSprite {
         bean.scale.set(0.6, 0.6);
         bean.antialiasing = true;
         bean.updateHitbox();
-
-        var name:String = 'icons/icon-' + iconName;
-        var file:Dynamic = Paths.image(name);
         
-        icon = new FlxSprite(trueX - 13, trueY - 23).loadGraphic(file, true, 150, 150);
+        try {icon = new HealthIcon(iconName);}catch(e){icon = new HealthIcon("face");} //idk why but it crashes alot of times so
+        icon.setPosition(trueX - 13, trueY - 23);
         icon.antialiasing = true;
         icon.updateHitbox();
         icon.setGraphicSize(Std.int(icon.width * 0.6));
@@ -181,6 +179,7 @@ class FreeplayCard extends FlxSprite {
         if(requirement == BEANS){ 
             locked = true;
         }
+        
         if(requirement == SPECIAL){ 
             for(song in songs){
                 if(Highscore.getScore(song, 2) == 0){

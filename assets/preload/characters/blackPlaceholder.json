@@ -51,9 +51,9 @@
 			],
 			"loop": true,
 			"fps": 24,
-			"anim": "singUP",
+			"anim": "black idle (placeholder)",
 			"indices": [],
-			"name": "black idle (placeholder)"
+			"name": "UP"
 		}
 	],
 	"no_antialiasing": false,

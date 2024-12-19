@@ -177,7 +177,7 @@ class ShopState extends MusicBeatState
 		Paths.clearUnusedMemory();
 
         for(i in 0... nodeData.length){
-            nodeData[i][4] = ClientPrefs.boughtArray[i];
+            nodeData[i][4] = true;
         }
         localBeans = ClientPrefs.beans;
 
@@ -402,39 +402,17 @@ class ShopState extends MusicBeatState
     function updateNodeVisibility(){
         nodes.forEach(function(node:ShopNode) {
             if(node.connection != null || node.connection != 'root'){
-                var connectedBought:Bool = checkPurchased(node.connection);
-                if(connectedBought){
                     node.portrait.color = 0xFFFFFFFF;
                     node.icon.visible = true;
                     node.text.visible = true;
-                }else{
-                    node.portrait.color = 0xFF000000;
-                    node.icon.visible = false;
-                    node.text.visible = false;
-                    node.visibleName = '???';
-                }
             }
 
-            if(node.bought){
-                node.text.visible = false;
-            }
-
-            if(node.gotRequirements == false){
-                node.portrait.color = 0xFF000000;
-                node.icon.visible = false;
-                node.text.visible = false;
-                node.visibleName = '???';
-            }
+            node.text.visible = false;
         });
     }
 
     function checkPurchased(_name:String):Bool{
-        var guh:Bool = false;
-        nodes.forEach(function(node:ShopNode) {
-            if(node.name == _name && node.bought){
-                guh = true;
-            }
-        });
+        var guh:Bool = true;
         return guh;
     }
 
@@ -467,22 +445,12 @@ class ShopState extends MusicBeatState
 
     function updateButton(?node:ShopNode = null){
         if(node != null){
-            var connectedBought:Bool = true;
-            connectedBought = checkPurchased(node.connection);
-            if(!node.bought){
-                equipbutton.animation.play('buy');
-                equipText.text = 'BUY X' + node.price;
-            }else{
-                equipbutton.animation.play('equipped');
-                equipText.text = 'EQUIP';
-            }
+            equipbutton.animation.play('equipped');
+            equipText.text = 'EQUIP';
+
             if(node.name == ClientPrefs.charOverrides[0] || node.name == ClientPrefs.charOverrides[1] || node.name == ClientPrefs.charOverrides[2]){
                 equipbutton.animation.play('grey');
                 equipText.text = 'EQUIPPED';
-            }
-            if(!node.gotRequirements || !connectedBought){
-                equipbutton.animation.play('locked');
-                equipText.text = 'LOCKED';
             }
         }
     }
@@ -598,37 +566,13 @@ class ShopState extends MusicBeatState
         {
             var pulseColor:FlxColor;
 
-            var connectedBought:Bool = true;
-
-            if(focusedNode.connection != null || focusedNode.connection != 'root'){
-                connectedBought = checkPurchased(focusedNode.connection);
-                trace(connectedBought, focusedNode.connection);
-            }
-
-            if(!focusedNode.bought && focusedNode.gotRequirements && localBeans >= focusedNode.price && connectedBought){
-                buyNode(focusedNode);
-                FlxG.sound.play(Paths.sound('shopbuy', 'impostor'), 1);
-                pulseColor = 0xFF30FF86;
-                //FlxG.sound.play(Paths.sound('pop', 'impostor'), 0.9);
-            }else if(!focusedNode.bought && focusedNode.gotRequirements && localBeans < focusedNode.price || !connectedBought){
-                FlxG.sound.play(Paths.sound('locked', 'impostor'), 1);
-                camUpper.shake(0.01, 0.35);
-                FlxG.camera.shake(0.005, 0.35);
-                pulseColor = 0xFFFF4444;
-            }else if(!focusedNode.gotRequirements){
-                FlxG.sound.play(Paths.sound('locked', 'impostor'), 1);
-                camUpper.shake(0.01, 0.35);
-                FlxG.camera.shake(0.005, 0.35);
-                pulseColor = 0xFFFF4444;
+            equipNode(focusedNode);
+            if(focusedNode.skinType == PET){
+                FlxG.sound.play(Paths.sound('equippet', 'impostor'), 1);
             }else{
-                equipNode(focusedNode);
-                if(focusedNode.skinType == PET){
-                    FlxG.sound.play(Paths.sound('equippet', 'impostor'), 1);
-                }else{
-                    FlxG.sound.play(Paths.sound('equip', 'impostor'), 1);
-                }
-                pulseColor = 0xFFFFA143;
+                FlxG.sound.play(Paths.sound('equip', 'impostor'), 1);
             }
+            pulseColor = 0xFFFFA143;
 
             if(buttonTween != null) buttonTween.cancel();
             buttonTween = FlxTween.color(equipbutton, 0.6, pulseColor, 0xFFFFFFFF, { ease: FlxEase.sineOut });

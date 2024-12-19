@@ -1,3 +1,5 @@
+//will probs rewrite this
+
 package;
 
 #if desktop
@@ -31,10 +33,6 @@ using StringTools;
 
 class AmongStoryMenuState extends MusicBeatState
 {
-	// Wether you have to beat the previous week for playing this one
-	// Not recommended, as people usually download your mod for, you know,
-	// playing just the modded week then delete it.
-	// defaults to True
 	public static var weekCompleted:Map<String, Bool> = new Map<String, Bool>();
 
 	var scoreText:FlxText;
@@ -74,41 +72,10 @@ class AmongStoryMenuState extends MusicBeatState
 	public var camSpace:FlxCamera;
 	public var camScreen:FlxCamera;
 
-	//                             red[0], green[1], yellowWeek[2] black[3] maroon[4] grey[5] pink[6] jorsawsee?[7] henry[8] tomong[9] loggo[10] alpha[11]
-	var unlockedWeek:Array<Bool> = [true, false, false, false, true, false, false, true, false, false, false, false]; //weeks in order of files in preload/weeks
-	
-	//var unlockedWeek:Array<Bool> = [true, true, true, true, true, true, true, true, true, true, true, true];
-
 	var localFinaleState:FinaleState;
 	var finaleAura:FlxSprite;
 
 	var caShader:ChromaticAbberation;
-
-	function doTheThing(){
-
-		if(Highscore.getScore('meltdown', 2) != 0){
-			unlockedWeek[1] = true;
-		}
-		if(Highscore.getScore('ejected', 2) != 0){
-			unlockedWeek[10] = true;
-			unlockedWeek[9] = true;
-			unlockedWeek[2] = true;
-		}
-		if(Highscore.getScore('double-kill', 2) != 0){
-			unlockedWeek[3] = true;
-			//
-		}
-		if(Highscore.getScore('titular', 2) != 0){
-			unlockedWeek[8] = true;
-		}
-		if(Highscore.getScore('boiling-point', 2) != 0){
-			unlockedWeek[5] = true;
-		}
-		if(Highscore.getScore('neurotic', 2) != 0){
-			unlockedWeek[6] = true;
-		}
-
-	}
 
 	override function create()
 	{
@@ -117,8 +84,6 @@ class AmongStoryMenuState extends MusicBeatState
 		Paths.clearUnusedMemory();
 
 		localFinaleState = ClientPrefs.finaleState;
-
-		doTheThing();
 
 		WeekData.reloadWeekFiles(true);
 
@@ -133,14 +98,6 @@ class AmongStoryMenuState extends MusicBeatState
 		FlxG.cameras.setDefaultDrawTarget(camSpace,true);
 
 		camSpace.zoom = 0.7;
-
-		if(localFinaleState == NOT_PLAYED){
-			caShader = new ChromaticAbberation(0);
-			add(caShader);
-			caShader.amount = 0;
-			var filter2:ShaderFilter = new ShaderFilter(caShader.shader);
-			camSpace.filters = [filter2];
-		}
 
 		starsBG = new FlxBackdrop(Paths.image('freeplay/starBG', 'impostor'));
 		starsBG.setPosition(111.3, 67.95);
@@ -229,8 +186,6 @@ class AmongStoryMenuState extends MusicBeatState
         blackPanel.alpha = 0;
         add(blackPanel);
 
-		var ui_tex = Paths.getSparrowAtlas('campaign_menu_UI_assets');
-
 		grpWeekText = new FlxTypedGroup<MenuItem>();
 		add(grpWeekText);
 		grpWeekText.cameras = [camScreen];
@@ -260,13 +215,11 @@ class AmongStoryMenuState extends MusicBeatState
 		DiscordClient.changePresence("In the Menus", null);
 		#end
 
-		var alphaWeek:Bool = true;
-
-		for (i in 0...12)
+		for (i => week in WeekData.weeksList)
 		{
 			WeekData.setDirectoryFromWeek(WeekData.weeksLoaded.get(WeekData.weeksList[i]));
 
-			var weekCircle:FlxSprite = new FlxSprite(0, 50).loadGraphic(Paths.image('storymenu/circle', 'impostor'));
+			var weekCircle:FlxSprite = new FlxSprite((i * 500), 50).loadGraphic(Paths.image('storymenu/circle', 'impostor'));
 			weekCircle.antialiasing = ClientPrefs.globalAntialiasing;
 
 			FlxMouseEvent.add(weekCircle, function onMouseDown(weekCircle:FlxSprite){
@@ -277,242 +230,12 @@ class AmongStoryMenuState extends MusicBeatState
 					selectedWeek = true;
 					trace("worked2");
 				}
-				else if ((curWeek - 1 == i && unlockedWeek[curWeek - 1] || curWeek + 1 == i && unlockedWeek[curWeek + 1])){
-					if(curWeek == 9 || curWeek == 10){
-						trace('lmao u thought');
-					}
-					else{
-						if(i > curWeek){
-							if(i == 5 || i == 6 || i == 7)
-								shipPlayAnim('left');
-							else
-								shipPlayAnim('right');
-						}
-						if(i < curWeek){
-							if(i == 5 || i == 6 || i == 7)
-								shipPlayAnim('right');
-							else
-								shipPlayAnim('left');
-						}
-						curWeek = i;
-
-						changeWeek();
-						FlxG.sound.play(Paths.sound('scrollMenu'));
-
-						trace("worked3");
-					}
-				}
-			}, null);
-
-			if (i == 5)
-			{
-				weekCircle.alpha = 1;
-				weekCircle.x = 0;
-				weekCircle.y += 400;
-			}
-			if (i == 6)
-			{
-				weekCircle.x = -400;
-				weekCircle.y += 400;
-			}
-			if (i == 7)
-			{
-				weekCircle.x = -800;
-				weekCircle.y += 400;
-			}
-			if (i == 8)
-			{
-				weekCircle.x = 0;
-				weekCircle.y -= 400;
-			}
-			if (i == 9)
-			{
-				weekCircle.x = 1200;
-				weekCircle.y += 400;
-			}
-			if (i == 10)
-			{
-				weekCircle.x = 800;
-				weekCircle.y += 400;
-			}
-			if (i == 11)
-			{
-				weekCircle.x = 800;
-				weekCircle.y -= 400;
-			}
-
-			if (i < 5)
-			{
-				weekCircle.x = i * 400;
-
-				if (i < 4)
-				{
-					var weekLine:FlxSprite = new FlxSprite(weekCircle.x + 95, 72).loadGraphic(Paths.image('storymenu/line', 'impostor'));
-					weekLine.antialiasing = ClientPrefs.globalAntialiasing;
-
-					var weekLine2:FlxSprite = new FlxSprite(weekCircle.x + 195, 72).loadGraphic(Paths.image('storymenu/line', 'impostor'));
-					weekLine2.antialiasing = ClientPrefs.globalAntialiasing;
-
-					var weekLine3:FlxSprite = new FlxSprite(weekCircle.x + 295, 72).loadGraphic(Paths.image('storymenu/line', 'impostor'));
-					weekLine3.antialiasing = ClientPrefs.globalAntialiasing;
-
-					weekLines.add(weekLine);
-					weekLines.add(weekLine2);
-					weekLines.add(weekLine3);
-
-					if(!unlockedWeek[i]){
-						weekLine.alpha = 0.5;
-						weekLine2.alpha = 0.5;
-						weekLine3.alpha = 0.5;
-					}
-				}
-			}
-
-			if (i == 4)
-			{
-				var weekLine:FlxSprite = new FlxSprite(-4, 165).loadGraphic(Paths.image('storymenu/line', 'impostor'));
-				weekLine.antialiasing = ClientPrefs.globalAntialiasing;
-
-				var weekLine2:FlxSprite = new FlxSprite(-4, 265).loadGraphic(Paths.image('storymenu/line', 'impostor'));
-				weekLine2.antialiasing = ClientPrefs.globalAntialiasing;
-
-				var weekLine3:FlxSprite = new FlxSprite(-4, 365).loadGraphic(Paths.image('storymenu/line', 'impostor'));
-				weekLine3.antialiasing = ClientPrefs.globalAntialiasing;
-
-				weekLine.angle = 90;
-				weekLine2.angle = 90;
-				weekLine3.angle = 90;
-
-				weekLines.add(weekLine);
-				weekLines.add(weekLine2);
-				weekLines.add(weekLine3);
-
-				weekCircle.alpha = 1;
-			}
-
-			if (i > 4 && i < 7)
-			{
-				var weekLine:FlxSprite = new FlxSprite(weekCircle.x - 95, 472).loadGraphic(Paths.image('storymenu/line', 'impostor'));
-				weekLine.antialiasing = ClientPrefs.globalAntialiasing;
-
-				var weekLine2:FlxSprite = new FlxSprite(weekCircle.x - 195, 472).loadGraphic(Paths.image('storymenu/line', 'impostor'));
-				weekLine2.antialiasing = ClientPrefs.globalAntialiasing;
-
-				var weekLine3:FlxSprite = new FlxSprite(weekCircle.x - 295, 472).loadGraphic(Paths.image('storymenu/line', 'impostor'));
-				weekLine3.antialiasing = ClientPrefs.globalAntialiasing;
-
-				weekLines.add(weekLine);
-				weekLines.add(weekLine2);
-				weekLines.add(weekLine3);
-
-				if(!unlockedWeek[i]){
-					weekLine.alpha = 0.5;
-					weekLine2.alpha = 0.5;
-					weekLine3.alpha = 0.5;
-				}
-			}
-
-			if (i == 8)
-			{
-				var weekLine:FlxSprite = new FlxSprite(-4, -27).loadGraphic(Paths.image('storymenu/line', 'impostor'));
-				weekLine.antialiasing = ClientPrefs.globalAntialiasing;
-
-				var weekLine2:FlxSprite = new FlxSprite(-4, -127).loadGraphic(Paths.image('storymenu/line', 'impostor'));
-				weekLine2.antialiasing = ClientPrefs.globalAntialiasing;
-
-				var weekLine3:FlxSprite = new FlxSprite(-4, -227).loadGraphic(Paths.image('storymenu/line', 'impostor'));
-				weekLine3.antialiasing = ClientPrefs.globalAntialiasing;
-
-				weekLine.angle = 90;
-				weekLine2.angle = 90;
-				weekLine3.angle = 90;
-
-				weekLines.add(weekLine);
-				weekLines.add(weekLine2);
-				weekLines.add(weekLine3);
-			}
-
-			if (i == 9)
-			{
-				var weekLine:FlxSprite = new FlxSprite(1197, 165).loadGraphic(Paths.image('storymenu/line', 'impostor'));
-				weekLine.antialiasing = ClientPrefs.globalAntialiasing;
-
-				var weekLine2:FlxSprite = new FlxSprite(1197, 265).loadGraphic(Paths.image('storymenu/line', 'impostor'));
-				weekLine2.antialiasing = ClientPrefs.globalAntialiasing;
-
-				var weekLine3:FlxSprite = new FlxSprite(1197, 365).loadGraphic(Paths.image('storymenu/line', 'impostor'));
-				weekLine3.antialiasing = ClientPrefs.globalAntialiasing;
-
-				weekLine.angle = 90;
-				weekLine2.angle = 90;
-				weekLine3.angle = 90;
-
-				weekLines.add(weekLine);
-				weekLines.add(weekLine2);
-				weekLines.add(weekLine3);
-
-				if(!unlockedWeek[8]){
-					weekLine.alpha = 0.5;
-					weekLine2.alpha = 0.5;
-					weekLine3.alpha = 0.5;
-				}
-			}
-			if (i == 10)
-			{
-				var weekLine:FlxSprite = new FlxSprite(797, 165).loadGraphic(Paths.image('storymenu/line', 'impostor'));
-				weekLine.antialiasing = ClientPrefs.globalAntialiasing;
-
-				var weekLine2:FlxSprite = new FlxSprite(797, 265).loadGraphic(Paths.image('storymenu/line', 'impostor'));
-				weekLine2.antialiasing = ClientPrefs.globalAntialiasing;
-
-				var weekLine3:FlxSprite = new FlxSprite(797, 365).loadGraphic(Paths.image('storymenu/line', 'impostor'));
-				weekLine3.antialiasing = ClientPrefs.globalAntialiasing;
-
-				weekLine.angle = 90;
-				weekLine2.angle = 90;
-				weekLine3.angle = 90;
-
-				weekLines.add(weekLine);
-				weekLines.add(weekLine2);
-				weekLines.add(weekLine3);
-
-				if(!unlockedWeek[i]){
-					weekLine.alpha = 0.5;
-					weekLine2.alpha = 0.5;
-					weekLine3.alpha = 0.5;
-				}
-			}
-			if (i == 11)
-			{
-				var weekLine:FlxSprite = new FlxSprite(797, -27).loadGraphic(Paths.image('storymenu/line', 'impostor'));
-				weekLine.antialiasing = ClientPrefs.globalAntialiasing;
-
-				var weekLine2:FlxSprite = new FlxSprite(797, -127).loadGraphic(Paths.image('storymenu/line', 'impostor'));
-				weekLine2.antialiasing = ClientPrefs.globalAntialiasing;
-
-				var weekLine3:FlxSprite = new FlxSprite(797, -227).loadGraphic(Paths.image('storymenu/line', 'impostor'));
-				weekLine3.antialiasing = ClientPrefs.globalAntialiasing;
-
-				weekLine.angle = 90;
-				weekLine2.angle = 90;
-				weekLine3.angle = 90;
-
-				weekLines.add(weekLine);
-				weekLines.add(weekLine2);
-				weekLines.add(weekLine3);
-
-				if(!unlockedWeek[10]){
-					weekLine.alpha = 0.5;
-					weekLine2.alpha = 0.5;
-					weekLine3.alpha = 0.5;
-				}
-			}
+			});
 
 			weekCircles.add(weekCircle);
 			weekXvalues.push(weekCircle.x - 95);
 			weekYvalues.push(weekCircle.y - 50);
 			trace(weekYvalues[i]);
-	
 		}
 
 		add(ship);
@@ -611,174 +334,20 @@ class AmongStoryMenuState extends MusicBeatState
 		{
 			if (!selectingDifficulty && canMove)
 			{
-				switch(curWeek)
+				if (controls.UI_LEFT_P || FlxG.mouse.wheel < 0)
 				{
-					case 0:
-						if (controls.UI_RIGHT_P)
-						{
-							changeWeek(1);
-							FlxG.sound.play(Paths.sound('scrollMenu'));
-							shipPlayAnim("right");
-						}
-
-						else if (controls.UI_DOWN_P || FlxG.mouse.wheel < 0)
-						{
-							changeWeek(5);
-							FlxG.sound.play(Paths.sound('scrollMenu'));
-							shipPlayAnim("down");
-						}
-
-						else if (controls.UI_UP_P || FlxG.mouse.wheel > 0)
-						{
-							changeWeek(8);
-							FlxG.sound.play(Paths.sound('scrollMenu'));
-							shipPlayAnim("up");
-						}
-
-					case 1:
-						if (controls.UI_LEFT_P)
-						{
-							changeWeek(-1);
-							FlxG.sound.play(Paths.sound('scrollMenu'));
-							shipPlayAnim("left");
-						}
-
-						else if (controls.UI_RIGHT_P && unlockedWeek[1])
-						{
-							changeWeek(1);
-							FlxG.sound.play(Paths.sound('scrollMenu'));
-							shipPlayAnim("right");
-						}
-
-					case 2:
-						if (controls.UI_LEFT_P)
-						{
-							changeWeek(-1);
-							FlxG.sound.play(Paths.sound('scrollMenu'));
-							shipPlayAnim("left");
-						}
-
-						else if (controls.UI_RIGHT_P && unlockedWeek[2])
-						{
-							changeWeek(1);
-							FlxG.sound.play(Paths.sound('scrollMenu'));
-							shipPlayAnim("right");
-						}
-
-						else if ((controls.UI_UP_P || FlxG.mouse.wheel > 0) && unlockedWeek[10])
-						{
-							changeWeek(9);
-							FlxG.sound.play(Paths.sound('scrollMenu'));
-							shipPlayAnim("up");
-						}
-
-						else if ((controls.UI_DOWN_P || FlxG.mouse.wheel < 0) && unlockedWeek[9])
-						{
-							changeWeek(8);
-							FlxG.sound.play(Paths.sound('scrollMenu'));
-							shipPlayAnim("down");
-						}
-
-					case 3:
-						if (controls.UI_LEFT_P)
-						{
-							changeWeek(-1);
-							FlxG.sound.play(Paths.sound('scrollMenu'));
-							shipPlayAnim("left");
-						}
-
-						else if (controls.UI_RIGHT_P && unlockedWeek[3])
-						{
-							changeWeek(1);
-							FlxG.sound.play(Paths.sound('scrollMenu'));
-							shipPlayAnim("right");
-						}
-
-						else if ((controls.UI_DOWN_P || FlxG.mouse.wheel < 0) && unlockedWeek[8])
-						{
-							changeWeek(6);
-							FlxG.sound.play(Paths.sound('scrollMenu'));
-							shipPlayAnim("down");
-						}
-					
-					case 4:
-						if (controls.UI_LEFT_P)
-						{
-							changeWeek(-1);
-							FlxG.sound.play(Paths.sound('scrollMenu'));
-							shipPlayAnim("left");
-						}
-
-					case 5:
-						if (controls.UI_LEFT_P && unlockedWeek[5])
-						{
-							changeWeek(1);
-							FlxG.sound.play(Paths.sound('scrollMenu'));
-							shipPlayAnim("left");
-						}
-
-						else if (controls.UI_UP_P || FlxG.mouse.wheel > 0)
-						{
-							changeWeek(-5);
-							FlxG.sound.play(Paths.sound('scrollMenu'));
-							shipPlayAnim("up");
-						}
-					
-					case 6:
-						if (controls.UI_LEFT_P && unlockedWeek[6])
-						{
-							changeWeek(1);
-							FlxG.sound.play(Paths.sound('scrollMenu'));
-							shipPlayAnim("left");
-						}
-
-						else if (controls.UI_RIGHT_P && unlockedWeek[5])
-						{
-							changeWeek(-1);
-							FlxG.sound.play(Paths.sound('scrollMenu'));
-							shipPlayAnim("right");
-						}
-					
-					case 7:
-						if (controls.UI_RIGHT_P)
-						{
-							changeWeek(-1);
-							FlxG.sound.play(Paths.sound('scrollMenu'));
-							shipPlayAnim("right");
-						}
-					
-					case 8:
-						if (controls.UI_DOWN_P || FlxG.mouse.wheel < 0)
-						{
-							changeWeek(-8);
-							FlxG.sound.play(Paths.sound('scrollMenu'));
-							shipPlayAnim("down");
-						}
-
-					case 9:
-						if (controls.UI_UP_P || FlxG.mouse.wheel > 0)
-						{
-							changeWeek(-6);
-							FlxG.sound.play(Paths.sound('scrollMenu'));
-							shipPlayAnim("up");
-						}
-
-					case 10:
-						if (controls.UI_UP_P || FlxG.mouse.wheel > 0)
-						{
-							changeWeek(-8);
-							FlxG.sound.play(Paths.sound('scrollMenu'));
-							shipPlayAnim("up");
-						}
-
-					case 11:
-						if (controls.UI_DOWN_P || FlxG.mouse.wheel < 0)
-						{
-							changeWeek(-9);
-							FlxG.sound.play(Paths.sound('scrollMenu'));
-							shipPlayAnim("down");
-						}
+					changeWeek(-1);
+					FlxG.sound.play(Paths.sound('scrollMenu'));
+					shipPlayAnim("left");
 				}
+
+				if (controls.UI_RIGHT_P || FlxG.mouse.wheel < 0)
+				{
+					changeWeek(1);
+					FlxG.sound.play(Paths.sound('scrollMenu'));
+					shipPlayAnim("left");
+				}	
+			}
 
 				if (controls.ACCEPT && curWeek != 0)
 				{
@@ -800,7 +369,6 @@ class AmongStoryMenuState extends MusicBeatState
 					MusicBeatState.switchState(new MainMenuState());
 				}
 			}
-		}
 		
 		super.update(elapsed);
 
@@ -831,17 +399,7 @@ class AmongStoryMenuState extends MusicBeatState
 			{
 				songArray.push(leWeek[i][0]);
 			}
-
-			// Nevermind that's stupid lmao
-			if(curWeek == 4 && localFinaleState == NOT_PLAYED) {
-				PlayState.storyPlaylist = ['finale'];
-			}else if(curWeek == 4 && localFinaleState == NOT_UNLOCKED) {
-				PlayState.storyPlaylist = ['defeat'];
-			}else if(curWeek == 4 && localFinaleState == COMPLETED){
-				PlayState.storyPlaylist = ['defeat'];
-			}else{
-				PlayState.storyPlaylist = songArray;
-			}
+			PlayState.storyPlaylist = songArray;
 			PlayState.isStoryMode = true;
 			selectedWeek = true;
 
@@ -856,7 +414,6 @@ class AmongStoryMenuState extends MusicBeatState
 			new FlxTimer().start(1, function(tmr:FlxTimer)
 			{
 				LoadingState.loadAndSwitchState(new PlayState(), true);
-				FreeplayState.destroyFreeplayVocals();
 			});
 		}
 		else

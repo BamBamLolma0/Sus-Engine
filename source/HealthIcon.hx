@@ -1,23 +1,20 @@
 package;
 
 import flixel.FlxSprite;
-import openfl.utils.Assets as OpenFlAssets;
 
 using StringTools;
 
 class HealthIcon extends FlxSprite
 {
 	public var sprTracker:FlxSprite;
-	private var isOldIcon:Bool = false;
 	private var isPlayer:Bool = false;
 	private var char:String = '';
 
-	public function new(char:String = 'bf', isPlayer:Bool = false)
+	public function new(char:String = 'face', isPlayer:Bool = false, ?allowGPU:Bool = true)
 	{
 		super();
-		isOldIcon = (char == 'bf-old');
 		this.isPlayer = isPlayer;
-		changeIcon(char);
+		changeIcon(char, allowGPU);
 		scrollFactor.set();
 	}
 
@@ -26,38 +23,42 @@ class HealthIcon extends FlxSprite
 		super.update(elapsed);
 
 		if (sprTracker != null)
-			setPosition(sprTracker.x + sprTracker.width + 10, sprTracker.y - 30);
+			setPosition(sprTracker.x + sprTracker.width + 12, sprTracker.y - 30);
 	}
 
-	public function swapOldIcon() {
-		if(isOldIcon = !isOldIcon) changeIcon('bf-old');
-		else changeIcon('bf');
-	}
-
-	public function changeIcon(char:String) {
+	private var iconOffsets:Array<Float> = [0, 0];
+	public function changeIcon(char:String, ?allowGPU:Bool = true) {
 		if(this.char != char) {
 			var name:String = 'icons/' + char;
 			if(!Paths.fileExists('images/' + name + '.png', IMAGE)) name = 'icons/icon-' + char; //Older versions of psych engine's support
 			if(!Paths.fileExists('images/' + name + '.png', IMAGE)) name = 'icons/icon-face'; //Prevents crash from missing icon
-			var file:Dynamic = Paths.image(name);
-			if(PlayState.curStage.toLowerCase() == 'finalem' && !isPlayer){
-				frames = Paths.getSparrowAtlas('icons/icon-blackFinale', 'preload');
-				animation.addByPrefix('calm', 'black icon calm', 24, true);
-				animation.addByPrefix('mad', 'black icon mad', 24, true);
-				animation.play('calm');
-				this.char = char;
-			}
-			else{
-				loadGraphic(file, true, 150, 150);
-				animation.add(char, [0, 1], 0, false, isPlayer);
-				animation.play(char);
-				this.char = char;
-			}
+			
+			var graphic = loadGraphic(Paths.image(name));
+			var iSize:Float = Math.round(graphic.width / graphic.height);
+			loadGraphic(graphic.graphic, true, Math.floor(graphic.width / iSize), Math.floor(graphic.height));
+			iconOffsets[0] = (width - 150) / iSize;
+			iconOffsets[1] = (height - 150) / iSize;
+			updateHitbox();
 
-			antialiasing = ClientPrefs.globalAntialiasing;
-			if(char.endsWith('-pixel')) {
+			animation.add(char, [for(i in 0...frames.frames.length) i], 0, false, isPlayer);
+			animation.play(char);
+			this.char = char;
+
+			if(char.endsWith('-pixel'))
 				antialiasing = false;
-			}
+			else
+				antialiasing = ClientPrefs.globalAntialiasing;
+		}
+	}
+
+	public var autoAdjustOffset:Bool = true;
+	override function updateHitbox()
+	{
+		super.updateHitbox();
+		if(autoAdjustOffset)
+		{
+			offset.x = iconOffsets[0];
+			offset.y = iconOffsets[1];
 		}
 	}
 

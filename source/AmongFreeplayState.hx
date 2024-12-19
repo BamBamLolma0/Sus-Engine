@@ -1,7 +1,6 @@
 package;
 
 import flixel.input.mouse.FlxMouseEvent;
-import FreeplayState.SongMetadata;
 import WeekData;
 import flash.text.TextField;
 import flixel.FlxCamera;
@@ -221,14 +220,6 @@ class AmongFreeplayState extends MusicBeatState
 		listOfButtons = [];
 		weeks = addWeeks();
 
-		if(ClientPrefs.forceUnlockedSongs != null){
-			localWeeks = ClientPrefs.forceUnlockedSongs;
-			hasSavedData = true;
-			trace(localWeeks);
-		}else{
-			localWeeks = weeks;
-		}
-
 		for (i in 0...weeks.length)
 		{
 			// lolLOLLING IM LOLLING
@@ -237,13 +228,8 @@ class AmongFreeplayState extends MusicBeatState
 			{
 				if (weeks[prevI].section == curWeek)
 				{
-					if(hasSavedData){
-						listOfButtons.push(new FreeplayCard(0, 0, weeks[prevI].songs[i][0], weeks[prevI].songs[i][1], weeks[prevI].songs[i][3],
-							weeks[prevI].songs[i][2], weeks[prevI].songs[i][4], weeks[prevI].songs[i][5], weeks[prevI].songs[i][6], localWeeks[prevI].songs[i][7]));
-					}else{
-						listOfButtons.push(new FreeplayCard(0, 0, weeks[prevI].songs[i][0], weeks[prevI].songs[i][1], weeks[prevI].songs[i][3],
-							weeks[prevI].songs[i][2], weeks[prevI].songs[i][4], weeks[prevI].songs[i][5], weeks[prevI].songs[i][6], weeks[prevI].songs[i][7]));
-					}
+					listOfButtons.push(new FreeplayCard(0, 0, weeks[prevI].songs[i][0], weeks[prevI].songs[i][1], weeks[prevI].songs[i][3],
+						weeks[prevI].songs[i][2], weeks[prevI].songs[i][4], weeks[prevI].songs[i][5], weeks[prevI].songs[i][6], weeks[prevI].songs[i][7]));
 				}
 			}
 		}
@@ -510,190 +496,27 @@ class AmongFreeplayState extends MusicBeatState
 
 	public static function addWeeks():Array<FreeplayWeek>
 	{
-		weeks = [];
-		// im just like putting this in its own function because
-		// jesus christ man this cant get near the coherent code
-		weeks.push({
-			songs: [
-				["Sussus Moogus", "impostor", 'red', FlxColor.RED, FROM_STORY_MODE, ['sussus-moogus'], 0, false],
-				["Sabotage", "impostor", 'red', FlxColor.RED, FROM_STORY_MODE, ['sabotage'], 0, false],
-				["Meltdown", "impostor2", 'red', FlxColor.RED, FROM_STORY_MODE, ['meltdown'], 0, false]
-			],
+		weeks = [];	
+		
+		WeekData.reloadWeekFiles(true);
 
-			section: 0
-		});
+		for (i => week in WeekData.weeksList) {
+			var impostorFormattedSongs:Array<Dynamic> = [];
 
-		weeks.push({
-			songs: [
-				["Sussus Toogus", "crewmate", 'green', FlxColor.fromRGB(0, 255, 0), FROM_STORY_MODE, ['sussus-toogus'], 0, false],
-				["Lights Down", "impostor3", 'green', FlxColor.fromRGB(0, 255, 0), FROM_STORY_MODE, ['lights-down'], 0, false],
-				["Reactor", "impostor3", 'green', FlxColor.fromRGB(0, 255, 0), FROM_STORY_MODE, ['reactor'], 0, false],
-				["Ejected", "parasite", 'para', FlxColor.fromRGB(0, 255, 0), FROM_STORY_MODE, ['ejected'], 0, false]
-			],
+			for (coolSong in WeekData.weeksLoaded.get(week).songs)
+				impostorFormattedSongs.push([coolSong[0], coolSong[1], coolSong[1], FlxColor.fromRGB(coolSong[2][0], coolSong[2][1], coolSong[2][2]), BEANS, coolSong[0], 0, false]);
 
-			section: 0
-		});
-
-		weeks.push({
-			songs: [
-				["Mando", "yellow", 'yellow', FlxColor.fromRGB(255, 218, 67), FROM_STORY_MODE, ['mando'], 0, false],
-				["Dlow", "yellow", 'yellow', FlxColor.fromRGB(255, 218, 67), FROM_STORY_MODE, ['dlow'], 0, false],
-				["Oversight", "white", 'white', FlxColor.WHITE, FROM_STORY_MODE, ['oversight'], 0, false],
-				["Danger", "black", 'black', FlxColor.fromRGB(179, 0, 255), FROM_STORY_MODE, ['danger'], 0, false],
-				["Double Kill", "whiteblack", 'black', FlxColor.fromRGB(179, 0, 255), FROM_STORY_MODE, ['double-kill'], 0, false]
-			],
-
-			section: 0
-		});
-
-		weeks.push({
-			songs: [
-				["Defeat", "black", 'black', FlxColor.fromRGB(179, 0, 255), FROM_STORY_MODE, ['defeat'], 0, false],
-				["Finale", "black", 'finale', FlxColor.fromRGB(179, 0, 255), SPECIAL, ['finale'], 0, false]
-			],
-
-			section: 0
-		});
-
-		weeks.push({
-			songs: [["Identity Crisis", "monotone", 'monotone', FlxColor.BLACK, SPECIAL, ['meltdown', 'ejected', 'double-kill', 'defeat', 'boiling-point', 'neurotic', 'pretender'], 0, false]],
-			section: 0
-		});
-
-		weeks.push({
-			songs: [
-				["Ashes", "maroon", 'maroon', FlxColor.fromRGB(181, 0, 0), FROM_STORY_MODE, ['ashes'], 0, false],
-				["Magmatic", "maroon", 'maroon', FlxColor.fromRGB(181, 0, 0), FROM_STORY_MODE, ['magmatic'], 0, false],
-				["Boiling Point", "boilingpoint", 'bpmar', FlxColor.fromRGB(181, 0, 0), FROM_STORY_MODE, ['boiling-point'], 0, false]
-			],
-
-			section: 1
-		});
-
-		weeks.push({
-			songs: [
-				["Delusion", "gray", 'grey', FlxColor.fromRGB(139, 157, 168), FROM_STORY_MODE, ['delusion'], 0, false],
-				["Blackout", "gray", 'grey', FlxColor.fromRGB(139, 157, 168), FROM_STORY_MODE, ['blackout'], 0, false],
-				["Neurotic", "gray", 'grey', FlxColor.fromRGB(139, 157, 168), FROM_STORY_MODE, ['neurotic'], 0, false]
-			],
-
-			section: 1
-		});
-
-		weeks.push({
-			songs: [
-				["Heartbeat", "pink", 'pink', FlxColor.fromRGB(255, 0, 222), FROM_STORY_MODE, ['heartbeat'], 0, false],
-				["Pinkwave", "pink", 'pink', FlxColor.fromRGB(255, 0, 222), FROM_STORY_MODE, ['pinkwave'], 0, false],
-				["Pretender", "pretender", 'pink', FlxColor.fromRGB(255, 0, 222), FROM_STORY_MODE, ['pretender'], 0, false]
-			],
-
-			section: 1
-		});
-
-		weeks.push({
-			songs: [["Sauces Moogus", "chef", 'chef', FlxColor.fromRGB(242, 114, 28), SPECIAL, ['ashes', 'delusion', 'heartbeat'], 0, false]],
-			section: 1
-		});
-
-		weeks.push({
-			songs: [
-				["O2", "jorsawsee", 'jorsawsee', FlxColor.fromRGB(38, 127, 230), FROM_STORY_MODE, ['o2'], 0],
-				["Voting Time", "votingtime", 'warchief', FlxColor.fromRGB(153, 67, 196), FROM_STORY_MODE, ['voting-time'], 0, false],
-				["Turbulence", "redmungus", 'redmunp', FlxColor.RED, FROM_STORY_MODE, ['turbulence'], 0, false],
-				["Victory", "warchief", 'warchief', FlxColor.fromRGB(153, 67, 196), FROM_STORY_MODE, ['victory'], 0, false]
-			],
-
-			section: 2
-		});
-
-		weeks.push({
-			songs: [
-				["ROOMCODE", "powers", 'powers', FlxColor.fromRGB(80, 173, 235), SPECIAL, ['victory'], 0, false]
-			],
-
-			section: 2
-		});
-
-		weeks.push({
-			songs: [
-				["Sussy Bussy", "tomongus", 'tomo', FlxColor.fromRGB(255, 90, 134), FROM_STORY_MODE, ['sussy-bussy'], 0, false],
-				["Rivals", "tomongus", 'tomo', FlxColor.fromRGB(255, 90, 134), FROM_STORY_MODE, ['rivals'], 0, false],
-				["Chewmate", "hamster", 'ham', FlxColor.fromRGB(255, 90, 134), FROM_STORY_MODE, ['chewmate'], 0, false]
-			],
-
-			section: 3
-		});
-
-		weeks.push({
-			songs: [
-				["Tomongus Tuesday", "tuesday", 'tomo', FlxColor.fromRGB(255, 90, 134), SPECIAL, ['chewmate'], 0, false],
-			],
-
-			section: 3
-		});
-
-		weeks.push({
-			songs: [
-				["Christmas", "fella", 'loggo', FlxColor.fromRGB(0, 255, 0), FROM_STORY_MODE, ['christmas'], 0, false],
-				["Spookpostor", "boo", 'loggo', FlxColor.fromRGB(0, 255, 0), FROM_STORY_MODE, ['spookpostor'], 0, false]
-			],
-
-			section: 4
-		});
-
-		weeks.push({
-			songs: [
-				["Titular", "henry", 'tit', FlxColor.ORANGE, FROM_STORY_MODE, ['titular'], 0, false],
-				["Greatest Plan", "charles", 'charles', FlxColor.RED, FROM_STORY_MODE, ['greatest-plan'], 0, false],
-				["Reinforcements", "ellie", 'ellie', FlxColor.ORANGE, FROM_STORY_MODE, ['reinforcements'], 0, false],
-				["Armed", "rhm", 'rhm', FlxColor.ORANGE, FROM_STORY_MODE, ['armed'], 0, false]
-			],
-
-			section: 5
-		});
-
-		weeks.push({
-			songs: [
-				["Alpha Moogus", "oldpostor", 'oldpostor', FlxColor.RED, BEANS, [], 250, false],
-				["Actin Sus", "oldpostor", 'oldpostor', FlxColor.RED, BEANS, [], 250, false]
-			],
-
-			section: 6
-		});
-
-		weeks.push({
-			songs: [
-				["Ow", "kills", 'kills', FlxColor.fromRGB(84, 167, 202), BEANS, [], 400, false],
-				["Who", "whoguys", 'who', FlxColor.fromRGB(22, 65, 240), BEANS, [], 500, false],
-				["Insane Streamer", "jerma", 'jerma', FlxColor.BLACK, BEANS, [], 400, false],
-				["Sussus Nuzzus", "nuzzles", 'nuzzus', FlxColor.BLACK, BEANS, [], 400, false],
-				["Idk", "idk", 'idk', FlxColor.fromRGB(255, 140, 177), BEANS, [], 350, false],
-				["Esculent", "dead", 'esculent', FlxColor.BLACK, BEANS, [], 350, false],
-				["Drippypop", "drippy", 'pop', FlxColor.fromRGB(188, 106, 223), BEANS, [], 425, false],
-				["Crewicide", "dave", 'dave', FlxColor.BLUE, BEANS, [], 450, false],
-				["Monotone Attack", "attack", 'monotoner', FlxColor.WHITE, BEANS, [], 400, false],
-				["Top 10", "top", 'top', FlxColor.RED, BEANS, [], 200, false]
-			],
-
-			section: 7
-		});
-
-		weeks.push({
-			songs: [
-				["Chippin", "cvp", 'chips', FlxColor.fromRGB(255, 60, 38), BEANS, [], 300, false],
-				["Chipping", "cvp", 'chips', FlxColor.fromRGB(255, 60, 38), BEANS, [], 300, false],
-				["Torture", "ziffy", 'torture', FlxColor.fromRGB(188, 106, 223), SPECIAL, ['chippin', 'chipping'], 0, false]
-			],
-
-			section: 8
-		});
+			weeks.push({
+				songs: impostorFormattedSongs,
+				section: i
+			});
+		}
 
 		return weeks;
 	}
 
 	function changeWeek(change:Int)
 	{
-
 		prevWeek = curWeek;
 
 		curWeek += change;
@@ -739,13 +562,8 @@ class AmongFreeplayState extends MusicBeatState
 			{
 				if (weeks[prevI].section == curWeek)
 				{
-					if(hasSavedData){
-						listOfButtons.push(new FreeplayCard(0, 0, weeks[prevI].songs[i][0], weeks[prevI].songs[i][1], weeks[prevI].songs[i][3],
-							weeks[prevI].songs[i][2], weeks[prevI].songs[i][4], weeks[prevI].songs[i][5], weeks[prevI].songs[i][6], localWeeks[prevI].songs[i][7]));
-					}else{
-						listOfButtons.push(new FreeplayCard(0, 0, weeks[prevI].songs[i][0], weeks[prevI].songs[i][1], weeks[prevI].songs[i][3],
-							weeks[prevI].songs[i][2], weeks[prevI].songs[i][4], weeks[prevI].songs[i][5], weeks[prevI].songs[i][6], weeks[prevI].songs[i][7]));
-					}
+					listOfButtons.push(new FreeplayCard(0, 0, weeks[prevI].songs[i][0], weeks[prevI].songs[i][1], weeks[prevI].songs[i][3],
+						weeks[prevI].songs[i][2], weeks[prevI].songs[i][4], weeks[prevI].songs[i][5], weeks[prevI].songs[i][6], weeks[prevI].songs[i][7]));
 				}
 			}
 		}
